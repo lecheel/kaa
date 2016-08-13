@@ -21,3 +21,15 @@ def show(self):
 class PssMode(filenamegrpmode.FilenameGrpMode):
     DEFAULT_GRP = os.getenv("HOME")+"/fte.grp"
     MODENAME = 'Pss'
+
+
+"""
+example 
+~/fte.grp
+grep in group view like Ag/Ack/sift/grin/pss with full path for reuse
+pss fork on https://github.com/lecheel/pss/tree/lestyle
+----
+File: /home/foo/work/foo.py
+12:   qweer foo
+24:   qazwsx foo
+"""
