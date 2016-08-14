@@ -155,11 +155,22 @@ class ToolCommands(Commands):
 
         kaa.app.show_dialog(doc)
 
+    @commandid('tools.pss_show')
+    @norerun
+    def execute_pss_show(self, wnd):
+        from kaa.ui.pss import pssmode
+        pssmode.show(wnd)
+
     @commandid('tools.pss')
     @norerun
     def execute_pss(self, wnd):
-        from kaa.ui.pss import pssmode
-        pssmode.show(wnd)
+        from kaa.ui.pss import pssdlgmode
+        doc = document.Document()
+        mode = pssdlgmode.PssDlgMode(wnd)
+        doc.setmode(mode)
+        mode.build_document()
+
+        kaa.app.show_dialog(doc)
 
     @commandid('tools.spellchecker')
     @norec

@@ -69,7 +69,7 @@ class FilenameGrpMode(defaultmode.DefaultMode):
             start = wnd.cursor.pos
             if modebase.SearchOption.LAST_SEARCH.text:
                 storeTEXT =  modebase.SearchOption.LAST_SEARCH.text
-            modebase.SearchOption.LAST_SEARCH.text = "File"
+            modebase.SearchOption.LAST_SEARCH.text = "File:"
             ret = wnd.document.mode.search_prev(start, modebase.SearchOption.LAST_SEARCH)
             if ret:
                 f, t = ret.span()
@@ -78,6 +78,7 @@ class FilenameGrpMode(defaultmode.DefaultMode):
                 pos = wnd.cursor.pos
                 tol = self.document.gettol(pos)
                 eol, line = self.document.getline(tol)
+                wnd.cursor.pos = start
                 wnd.screen.selection.clear()
                 if storeTEXT:
                     modebase.SearchOption.LAST_SEARCH.text = storeTEXT

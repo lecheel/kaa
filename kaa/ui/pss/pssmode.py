@@ -28,6 +28,7 @@ example
 ~/fte.grp
 grep in group view like Ag/Ack/sift/grin/pss with full path for reuse
 pss fork on https://github.com/lecheel/pss/tree/lestyle
+grin fork on https://github.com/lecheel/grin
 ----
 File: /home/foo/work/foo.py
 12:   qweer foo
