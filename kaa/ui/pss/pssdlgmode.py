@@ -85,10 +85,6 @@ class PssDlgMode(dialogmode.DialogMode):
             if pssdir:
                 PssOption.LASTOPTION.directory = pssdir[0][0]
 
-            pssfiles = config.hist('pss_filename').get()
-            if pssfiles:
-                PssOption.LASTOPTION.filenames = pssfiles[0][0]
-
         self.option = PssOption.LASTOPTION
 
     def close(self):
@@ -108,8 +104,7 @@ class PssDlgMode(dialogmode.DialogMode):
 
         cursor = dialogmode.DialogCursor(wnd,
                                          [dialogmode.MarkRange('searchtext'),
-                                          dialogmode.MarkRange('directory'),
-                                             dialogmode.MarkRange('filenames')])
+                                          dialogmode.MarkRange('directory')])
         wnd.set_cursor(cursor)
         f, t = self.document.marks['searchtext']
         wnd.cursor.setpos(f)
@@ -133,13 +128,15 @@ class PssDlgMode(dialogmode.DialogMode):
                 path = p if len(p) < len(path) else path
             f.append_text('default', path, mark_pair='directory')
             f.append_text('default', '\n')
-
+            
+            """
             # filename
             f.append_text('caption', 'Filenames:')
             f.append_text('default', ' ')
             f.append_text('default', self.option.filenames,
                           mark_pair='filenames')
             f.append_text('default', '\n')
+            """
 
             # working directory
             f.append_text('default', '(current dir)')
@@ -204,15 +201,10 @@ class PssDlgMode(dialogmode.DialogMode):
     def field_next(self, wnd):
         searchfrom, searchto = wnd.document.marks['searchtext']
         dirfrom, dirto = wnd.document.marks['directory']
-        filefrom, fileto = wnd.document.marks['filenames']
 
         if searchfrom <= wnd.cursor.pos <= searchto:
             wnd.cursor.setpos(dirfrom)
             wnd.screen.selection.set_range(dirfrom, dirto)
-
-        elif dirfrom <= wnd.cursor.pos <= dirto:
-            wnd.cursor.setpos(filefrom)
-            wnd.screen.selection.set_range(filefrom, fileto)
 
         else:
             wnd.cursor.setpos(searchfrom)
@@ -224,7 +216,6 @@ class PssDlgMode(dialogmode.DialogMode):
     def pss_history(self, wnd):
         searchfrom, searchto = wnd.document.marks['searchtext']
         dirfrom, dirto = wnd.document.marks['directory']
-        filefrom, fileto = wnd.document.marks['filenames']
 
         if searchfrom <= wnd.cursor.pos <= searchto:
             def callback(result):
@@ -241,7 +232,7 @@ class PssDlgMode(dialogmode.DialogMode):
                                         )],
                                     callback)
 
-        elif dirfrom <= wnd.cursor.pos <= dirto:
+        else:
             def callback(result):
                 if result:
                     f, t = wnd.document.marks['directory']
@@ -258,20 +249,6 @@ class PssDlgMode(dialogmode.DialogMode):
             filterlist.show_listdlg('Recent directories',
                                     hist, callback)
 
-        else:
-            def callback(result):
-                if result:
-                    f, t = wnd.document.marks['filenames']
-                    wnd.document.replace(f, t, result)
-                    wnd.cursor.setpos(f)
-                    f, t = wnd.document.marks['filenames']
-                    wnd.screen.selection.set_range(f, t)
-
-            filterlist.show_listdlg('Recent filenames',
-                                    [s for s,
-                                        info in kaa.app.config.hist('pss_filename').get(
-                                        )],
-                                    callback)
 
     @commandid('pssdlg.select-dir')
     @norec
@@ -337,14 +314,9 @@ class PssDlgMode(dialogmode.DialogMode):
         self.replace_string(
             wnd, f, t, dir, update_cursor=True)
 
-    def get_files(self):
-        f, t = self.document.marks['filenames']
-        return self.document.gettext(f, t)
-
     def run_pss(self, wnd):
         self.option.text = self.get_search_str()
         self.option.directory = self.get_dir()
-        self.option.filenames = self.get_files()
 
         if (self.option.text and self.option.directory and
                 self.option.filenames):
@@ -353,12 +325,11 @@ class PssDlgMode(dialogmode.DialogMode):
             path = os.path.abspath(os.path.expanduser(
                 self.option.directory))
             kaa.app.config.hist('pss_dirname').add(path)
-            kaa.app.config.hist('pss_filename').add(self.option.filenames)
 
         wnd.get_label('popup').destroy()
 #        TODO pss have problem in stream output lost group option
 #        cmd = "pss --fte %s >~/fte.grp 2>&1" % (self.option.text) 
-        cmd = "grin --fte %s >~/fte.grp 2>&1" % (self.option.text) 
+        cmd = "cd %s; grin --fte %s >~/fte.grp 2>&1" % (self.option.directory,self.option.text) 
 #        cmd = "ag --fte %s >~/fte.grp 2>&1" % (self.option.text) 
         subprocess.check_output(cmd,shell=True,)
         kaa.app.messagebar.set_message("grep is done")
